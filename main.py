@@ -17,8 +17,12 @@ message_id_global = None
 
 def charger_stock():
     if os.path.exists(STOCK_FILE):
-        with open(STOCK_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(STOCK_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            # Fichier vide ou corrompu -> on retourne un dict vide
+            return {}
     return {}
 
 
