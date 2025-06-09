@@ -177,8 +177,4 @@ async def on_reaction_add(reaction, user):
 
 
 
-keep_alive()
-
-
-
 bot.run(os.getenv("DISCORD_TOKEN"))
