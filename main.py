@@ -3,14 +3,10 @@ from discord.ext import commands
 import json
 import os
 
-
 intents = discord.Intents.default()
-intents.messages = True
-intents.reactions = True
 intents.message_content = True
-intents.guilds = True
+intents.reactions = True
 intents.members = True 
-
 
 bot = commands.Bot(command_prefix="/", intents=intents)
 
@@ -153,31 +149,6 @@ async def resetstock(ctx):
 
 
 @bot.event
-async def on_reaction_remove(reaction, user):
-    if user.bot:
-        return
-
-    emoji = str(reaction.emoji)
-    if emoji not in stock_armes:
-        return
-
-    arme = stock_armes[emoji]
-    # Vérifie que c'était bien l'utilisateur qui possédait cette arme
-    if arme["utilisateur"] == user.id:
-        arme["disponible"] = True
-        arme["utilisateur"] = None
-
-        try:
-            channel = reaction.message.channel
-            message = await channel.fetch_message(message_id_global)
-            await message.edit(embed=generer_embed_stock())
-        except Exception as e:
-            print(f"Erreur mise à jour message stock (reaction remove): {e}")
-
-        sauvegarder_stock(stock_armes)
-
-
-@bot.event
 async def on_reaction_add(reaction, user):
     if user.bot:
         return
@@ -193,7 +164,7 @@ async def on_reaction_add(reaction, user):
 
     arme["disponible"] = False
     arme["utilisateur"] = user.id
-dans 
+
     try:
         channel = reaction.message.channel
         message = await channel.fetch_message(message_id_global)
@@ -202,7 +173,6 @@ dans
         print(f"Erreur mise à jour message stock: {e}")
 
     sauvegarder_stock(stock_armes)
-
 
 
 import os
