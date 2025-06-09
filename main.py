@@ -5,9 +5,12 @@ import os
 
 
 intents = discord.Intents.default()
-intents.message_content = True
+intents.messages = True
 intents.reactions = True
+intents.message_content = True
+intents.guilds = True
 intents.members = True 
+
 
 bot = commands.Bot(command_prefix="/", intents=intents)
 
@@ -147,6 +150,25 @@ async def resetstock(ctx):
     except Exception as e:
         print(f"Erreur mise à jour message stock: {e}")
     sauvegarder_stock(stock_armes)
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    try:
+        if payload.message_id != ID_DU_MESSAGE:
+            return
+
+        user_id = payload.user_id
+        emoji = str(payload.emoji)
+
+        stock = charger_stock()
+
+        if emoji in stock and stock[emoji]["possesseur"] == user_id:
+            stock[emoji]["possesseur"] = None
+            sauvegarder_stock(stock)
+            print(f"🔁 {emoji} rendu automatiquement par {user_id} (reaction retirée)")
+            await mettre_a_jour_message_stock()
+    except Exception as e:
+        print(f"❌ Erreur dans on_raw_reaction_remove : {e}")
 
 
 @bot.event
