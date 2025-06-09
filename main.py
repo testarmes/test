@@ -151,24 +151,30 @@ async def resetstock(ctx):
         print(f"Erreur mise à jour message stock: {e}")
     sauvegarder_stock(stock_armes)
 
+
 @bot.event
-async def on_raw_reaction_remove(payload):
-    try:
-        if payload.message_id != ID_DU_MESSAGE:
-            return
+async def on_reaction_remove(reaction, user):
+    if user.bot:
+        return
 
-        user_id = payload.user_id
-        emoji = str(payload.emoji)
+    emoji = str(reaction.emoji)
+    if emoji not in stock_armes:
+        return
 
-        stock = charger_stock()
+    arme = stock_armes[emoji]
+    # Vérifie que c'était bien l'utilisateur qui possédait cette arme
+    if arme["utilisateur"] == user.id:
+        arme["disponible"] = True
+        arme["utilisateur"] = None
 
-        if emoji in stock and stock[emoji]["possesseur"] == user_id:
-            stock[emoji]["possesseur"] = None
-            sauvegarder_stock(stock)
-            print(f"🔁 {emoji} rendu automatiquement par {user_id} (reaction retirée)")
-            await mettre_a_jour_message_stock()
-    except Exception as e:
-        print(f"❌ Erreur dans on_raw_reaction_remove : {e}")
+        try:
+            channel = reaction.message.channel
+            message = await channel.fetch_message(message_id_global)
+            await message.edit(embed=generer_embed_stock())
+        except Exception as e:
+            print(f"Erreur mise à jour message stock (reaction remove): {e}")
+
+        sauvegarder_stock(stock_armes)
 
 
 @bot.event
@@ -187,7 +193,7 @@ async def on_reaction_add(reaction, user):
 
     arme["disponible"] = False
     arme["utilisateur"] = user.id
-
+dans 
     try:
         channel = reaction.message.channel
         message = await channel.fetch_message(message_id_global)
